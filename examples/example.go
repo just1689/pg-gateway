@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/just1689/pg-gateway/client"
 	"github.com/just1689/pg-gateway/query"
+	"sync"
 	"time"
 )
 
@@ -12,8 +13,8 @@ var svr = "http://localhost:8080"
 
 func main() {
 	start := time.Now()
-	//testInsert()
-	testReadAsync()
+	testInsert()
+	//testReadAsync()
 	//testRead()
 	fmt.Println(time.Since(start))
 }
@@ -29,18 +30,40 @@ type user struct {
 }
 
 func testInsert() {
-	for i := 0; i < 1000; i++ {
-		u := user{
-			ID:        uuid.New().String(),
-			FirstName: "Justin",
-			LastName:  "Tamblyn",
-			Email:     uuid.New().String(),
-			Password:  "some_hash",
+	totalRows := 5000
+	totalClients := 12
+	work := make(chan int)
+	done := sync.WaitGroup{}
+	done.Add(1)
+
+	go func() {
+		for i := 1; i <= totalRows; i++ {
+			work <- i
 		}
-		if err := client.Insert(svr, userEntities, u); err != nil {
-			panic(err)
-		}
+		close(work)
+	}()
+
+	for g := 1; g <= totalClients; g++ {
+		go func() {
+			for w := range work {
+				u := user{
+					ID:        uuid.New().String(),
+					FirstName: "Justin",
+					LastName:  "Tamblyn",
+					Email:     uuid.New().String(),
+					Password:  "some_hash",
+				}
+				if err := client.Insert(svr, userEntities, u); err != nil {
+					panic(err)
+				}
+				if w == totalRows {
+					done.Done()
+				}
+			}
+		}()
 	}
+	done.Wait()
+
 }
 
 func testReadAsync() {
