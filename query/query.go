@@ -1,6 +1,7 @@
 package query
 
 import (
+	"errors"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
@@ -113,7 +114,7 @@ func generateWhere(q *Query, queryString string, bindArrIn []interface{}) (strin
 	return queryString, bindArrIn
 }
 
-func (q *Query) processOtherQuery(field, value string) {
+func (q *Query) processOtherQuery(field, value string) (err error) {
 	if field == "limit" {
 		i, _ := strconv.Atoi(value)
 		q.Limit = i
@@ -122,10 +123,9 @@ func (q *Query) processOtherQuery(field, value string) {
 		q.Select = strings.Split(value, ",")
 		return
 	}
-	//TODO: determine whether or not this error should be fatal. If you subscribe to the idea
-	// that tests should cover possible use cases, it may be useful to panic here.
-	logrus.Errorln("not sure how to handle", field, value, "for processOtherQuery")
-
+	err = errors.New("not sure how to handle " + field + "=" + value + " for processOtherQuery. Are you missing an operator?")
+	logrus.Errorln(err)
+	return
 }
 
 type Comparison struct {

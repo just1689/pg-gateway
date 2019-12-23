@@ -4,7 +4,11 @@ import "testing"
 
 func TestBuildQueryFromURLForSimpleQuery(t *testing.T) {
 	url := "people?age=eq.25"
-	query := BuildQueryFromURL(url)
+	query, err := BuildQueryFromURL(url)
+	if err != nil {
+		t.Error("unexpected error returned for good url")
+		return
+	}
 	if query.Entity != "people" {
 		t.Log("Got", query.Entity, "and not", "people")
 		t.Fail()
@@ -31,7 +35,11 @@ func TestBuildQueryFromURLForSimpleQuery(t *testing.T) {
 
 func TestBuildQueryFromURLForMultiQuery(t *testing.T) {
 	url := "people?age=gte.25&active=is.true"
-	query := BuildQueryFromURL(url)
+	query, err := BuildQueryFromURL(url)
+	if err != nil {
+		t.Error("unexpected error returned for good url")
+		return
+	}
 	if query.Entity != "people" {
 		t.Log("Got", query.Entity, "and not", "people")
 		t.Fail()
@@ -71,7 +79,11 @@ func TestBuildQueryFromURLForMultiQuery(t *testing.T) {
 
 func TestBuildQueryFromURLForMultiQuery3(t *testing.T) {
 	url := "people?age=gte.25&active=is.true&name=eq.Justin"
-	query := BuildQueryFromURL(url)
+	query, err := BuildQueryFromURL(url)
+	if err != nil {
+		t.Error("unexpected error returned for good url")
+		return
+	}
 	if query.Entity != "people" {
 		t.Log("Got", query.Entity, "and not", "people")
 		t.Fail()
@@ -124,7 +136,11 @@ func TestBuildQueryFromURLForMultiQuery3(t *testing.T) {
 
 func TestBuildQueryFromURLForLimit(t *testing.T) {
 	url := "people?age=gte.25&active=is.true&name=eq.Justin&limit=10"
-	query := BuildQueryFromURL(url)
+	query, err := BuildQueryFromURL(url)
+	if err != nil {
+		t.Error("unexpected error returned for good url")
+		return
+	}
 	if query.Limit != 10 {
 		t.Error("did not get limit of 10, instead got", query.Limit)
 		return
@@ -133,7 +149,11 @@ func TestBuildQueryFromURLForLimit(t *testing.T) {
 
 func TestBuildQueryFromURLForLimitFirst(t *testing.T) {
 	url := "people?limit=10"
-	query := BuildQueryFromURL(url)
+	query, err := BuildQueryFromURL(url)
+	if err != nil {
+		t.Error("unexpected error returned for good url")
+		return
+	}
 	if query.Limit != 10 {
 		t.Error("did not get limit for first param of 10, instead got", query.Limit)
 		return
@@ -142,7 +162,11 @@ func TestBuildQueryFromURLForLimitFirst(t *testing.T) {
 
 func TestBuildQueryFromURLForSelect1(t *testing.T) {
 	url := "people?age=gte.25&active=is.true&name=eq.Justin&limit=10&select=id"
-	query := BuildQueryFromURL(url)
+	query, err := BuildQueryFromURL(url)
+	if err != nil {
+		t.Error("unexpected error returned for good url")
+		return
+	}
 	if len(query.Select) != 1 {
 		t.Error("did not find a select! should be one")
 		return
@@ -151,7 +175,11 @@ func TestBuildQueryFromURLForSelect1(t *testing.T) {
 
 func TestBuildQueryFromURLForSelect2(t *testing.T) {
 	url := "people?age=gte.25&active=is.true&name=eq.Justin&limit=10&select=id,name"
-	query := BuildQueryFromURL(url)
+	query, err := BuildQueryFromURL(url)
+	if err != nil {
+		t.Error("unexpected error returned for good url")
+		return
+	}
 	if len(query.Select) != 2 {
 		t.Error("did not find 2 select! should be 2")
 		return
@@ -160,5 +188,13 @@ func TestBuildQueryFromURLForSelect2(t *testing.T) {
 	if query.Select[0] != "id" || query.Select[1] != "name" {
 		t.Error("expected selects to be id and name, not", query.Select[0], query.Select[1])
 	}
+}
 
+func TestBuildQueryFromURL(t *testing.T) {
+	u := "http://localhost:8080/friends?id=100"
+	_, err := BuildQueryFromURL(u)
+	if err == nil {
+		t.Error("expected bad url to return result in error for BuildQueryFromURL")
+		return
+	}
 }

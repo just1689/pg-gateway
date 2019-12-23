@@ -96,7 +96,11 @@ func HandleGetMany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	q := query.BuildQueryFromURL(r.URL.String()[1:])
+	q, err := query.BuildQueryFromURL(r.URL.String()[1:])
+	if err != nil {
+		http.Error(w, "Could not build query from http request", http.StatusBadRequest)
+		return
+	}
 	c, err := db.GetByQuery(q)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

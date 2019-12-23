@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func BuildQueryFromURL(u string) (result Query) {
+func BuildQueryFromURL(u string) (result Query, err error) {
 	split := splitFullURL(u)
 	result = Query{
 		Entity:      split[0],
@@ -21,7 +21,10 @@ func BuildQueryFromURL(u string) (result Query) {
 			}
 			riArr := strings.Split(coArr[1], ".")
 			if len(riArr) == 1 {
-				result.processOtherQuery(coArr[0], riArr[0])
+				err = result.processOtherQuery(coArr[0], riArr[0])
+				if err != nil {
+					return
+				}
 				continue
 			}
 			co.Comparator = riArr[0]
