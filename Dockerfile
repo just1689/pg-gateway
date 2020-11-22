@@ -2,11 +2,11 @@ FROM golang:1.12.4-alpine3.9 as vendor
 RUN mkdir /user && \
     echo 'nobody:x:65534:65534:nobody:/:' > /user/passwd && \
     echo 'nobody:x:65534:' > /user/group
-RUN apk add --no-cache ca-certificates git
+# RUN apk add --no-cache ca-certificates git
 WORKDIR /src
-COPY go.mod ./
-RUN go mod download
-RUN go mod vendor
+# COPY . ./
+# RUN go mod download
+# RUN go mod vendor
 
 
 FROM vendor as builder
